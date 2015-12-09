@@ -6,9 +6,12 @@
 
 using namespace std;
 
-#define MAX (1024*8*4)
+#define MAX (1024*8*32)
 int array[MAX+1];
 int org_array[MAX+1];
+int stack[MAX];
+
+int quick_select(int data[], int front, int rear, int kth);
 
 inline void exchange(int data[], int i, int j)
 {
@@ -62,6 +65,21 @@ void insertion_sort(int data[], int length)
 	int j;
 	int tmp;
 	for(int i = 0; i< length; ++i)
+	{
+		tmp = data[i];
+		for (j = i; j >0 && tmp < data[j-1] ; j--)
+		{
+			data[j] = data[j-1];
+		}
+		data[j] = tmp;
+	}
+}
+
+void insertion_sort_range(int data[], int front, int rear)
+{
+	int j;
+	int tmp;
+	for(int i = front; i< rear; ++i)
 	{
 		tmp = data[i];
 		for (j = i; j >0 && tmp < data[j-1] ; j--)
@@ -176,13 +194,13 @@ int partition(int data[], int front, int rear)
 // max of stack size : 2
 void quick_sort_iterative (int arr[], int front, int rear)
 {
-	int stack[2];
     int top = -1;
+
+    int max = -1;
 
     stack[ ++top ] = front;
     stack[ ++top ] = rear;
 
-    int max = 0;
     while ( top >= 0 )
     {
         rear = stack[ top-- ];
@@ -202,12 +220,12 @@ void quick_sort_iterative (int arr[], int front, int rear)
             stack[ ++top ] = rear;
         }
 
-        if (top > max)
+        if (max < top)
         {
         	max = top;
         }
-        assert(top + 1 <= 2);
     }
+    //printf("max stack index %d\n", max);
 }
 
 // stack overflow can be occurred
@@ -221,6 +239,77 @@ void quick_sort(int data[], int front, int rear)
 	}
 }
 
+void select_pivot(int data[], int front, int rear)
+{
+	if (front == rear)
+	{
+		return;
+	}
+
+	int n = (rear - front + 1) / 5;
+	if ((rear - front +1) % 5 != 0)
+	{
+		n++;
+	}
+	int i = 0;
+
+	for (i = 0; front + 5*(i+1) -1 <= rear; ++i)
+	{
+		insertion_sort_range(data, front + 5*i + 0, front+ 5*i + 4);
+		exchange(data, front + i, front + 5 *i +2);
+	}
+	if (i < n)
+	{
+		insertion_sort_range(data, front + 5*i, rear);
+		exchange(data, front + i, (front + 5*i + rear)/2);
+	}
+
+	quick_select(data, front, front + n - 1, n/2);
+	exchange(data, front + n/2, rear);
+}
+
+int quick_select_iterative(int data[], int front, int rear, int kth)
+{
+    if ( front == rear )
+    {
+    	return data[front];
+    }
+
+    int stack[MAX];
+    int top = -1;
+    int order = kth;
+    int pivot_position = 0;
+
+    stack[++top] = front;
+    stack[++top] = rear;
+
+    while(top >= 1)
+    {
+    	rear = stack[top--];
+    	front = stack[top--];
+
+        pivot_position = partition(data, front, rear);
+        int length = pivot_position - front + 1;
+        if ( length == order )
+        {
+        	break;
+        }
+        else if ( order < length )
+        {
+        	stack[++top] = front;
+        	stack[++top] = pivot_position-1;
+        }
+        else
+        {
+        	stack[++top] = pivot_position + 1;
+        	stack[++top] = rear;
+        	order -= length;
+        }
+    }
+
+    return data[pivot_position];
+}
+
 int quick_select(int data[], int front, int rear, int kth)
 {
     if ( front == rear )
@@ -228,6 +317,7 @@ int quick_select(int data[], int front, int rear, int kth)
     	return data[front];
     }
 
+    select_pivot(data, front, rear);
     int pivot_position = partition(data, front, rear);
 
     int length = pivot_position - front + 1;
@@ -310,7 +400,6 @@ int main() {
 	end_time = clock();
 	cout << "stooge_sort time : " << end_time - start_time << "ms"<< endl;
 
-
 	for (int i = 0; i< MAX; ++i)
 	{
 		array[i] = org_array[i];
@@ -337,25 +426,6 @@ int main() {
 	merge_sort(array, MAX, 0, MAX-1);
 	end_time = clock();
 	cout << "merge_sort time : " << end_time - start_time << "ms"<< endl;
-	*/
-
-	for (int i = 0; i< MAX; ++i)
-	{
-		array[i] = org_array[i];
-	}
-	start_time = clock();
-	quick_sort(array, 0, MAX-1);
-	end_time = clock();
-	cout << "quick_sort time : " << end_time - start_time << "ms"<< endl;
-
-	//for (int i = 0; i< MAX; ++i)
-	//{
-	//	array[i] = org_array[i];
-	//}
-	start_time = clock();
-	quick_sort_iterative(array, 0, MAX-1);
-	end_time = clock();
-	cout << "quick_sort iter time : " << end_time - start_time << "ms"<< endl;
 
 	for (int i = 0; i< MAX; ++i)
 	{
@@ -365,6 +435,36 @@ int main() {
 	heap_sort(array, MAX);
 	end_time = clock();
 	cout << "heap_sort time : " << end_time - start_time << "ms"<< endl;
+
+	for (int i = 0; i< MAX; ++i)
+	{
+		array[i] = org_array[i];
+	}
+	start_time = clock();
+	quick_sort(array, 0, MAX-1);
+	end_time = clock();
+	cout << "quick_sort time : " << end_time - start_time << "ms"<< endl;
+	*/
+
+	for (int i = 0; i< MAX; ++i)
+	{
+		array[i] = org_array[i];
+	}
+	start_time = clock();
+	quick_sort_iterative(array, 0, MAX-1);
+	end_time = clock();
+	cout << "quick_sort_iterative time : " << end_time - start_time << "ms"<< endl;
+
+	start_time = clock();
+	int result = quick_select(array, 0, MAX-1, 1);
+	end_time = clock();
+	assert(result == array[0]);
+	cout << "quick_select time : " << end_time - start_time << "ms"<< endl;
+
+	start_time = clock();
+	quick_sort(array, 0, MAX-1);
+	end_time = clock();
+	cout << "quick_sort time : " << end_time - start_time << "ms"<< endl;
 
 	for(int i = 1; i < MAX -1;++i)
 	{
