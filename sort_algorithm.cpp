@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+// how to decrease stack depth in recursive version
+// how to decrease memoization data size
+
 using namespace std;
 
 #define MAX (1024*8*4)
