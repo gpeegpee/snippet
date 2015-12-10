@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define MAX (1024*8*32)
+#define MAX (1024*8*4)
 int array[MAX+1];
 int org_array[MAX+1];
 int stack[MAX];
@@ -40,15 +40,15 @@ void stooge_sort(int data[], int front, int rear)
 }
 
 // stable, in-place sort
-void bubble_sort(int data[], int length)
+void bubble_sort(int data[], int front, int rear)
 {
 	int i;
 	int j;
 	int tmp;
 
-	for(int i = length - 1 ; i > 0; --i)
+	for(int i = rear ; i >= front; --i)
 	{
-		for(int j = 0; j < i ; ++j)
+		for(int j = front; j < i ; ++j)
 		{
 			if (data[j] > data[j+1])
 			{
@@ -60,29 +60,14 @@ void bubble_sort(int data[], int length)
 	}
 }
 
-void insertion_sort(int data[], int length)
+void insertion_sort(int data[], int front, int rear)
 {
 	int j;
 	int tmp;
-	for(int i = 0; i< length; ++i)
+	for(int i = front; i<= rear; ++i)
 	{
 		tmp = data[i];
-		for (j = i; j >0 && tmp < data[j-1] ; j--)
-		{
-			data[j] = data[j-1];
-		}
-		data[j] = tmp;
-	}
-}
-
-void insertion_sort_range(int data[], int front, int rear)
-{
-	int j;
-	int tmp;
-	for(int i = front; i< rear; ++i)
-	{
-		tmp = data[i];
-		for (j = i; j >0 && tmp < data[j-1] ; j--)
+		for (j = i; j > front && tmp < data[j-1] ; j--)
 		{
 			data[j] = data[j-1];
 		}
@@ -225,7 +210,7 @@ void quick_sort_iterative (int arr[], int front, int rear)
         	max = top;
         }
     }
-    //printf("max stack index %d\n", max);
+    printf("max stack index %d\n", max);
 }
 
 // stack overflow can be occurred
@@ -255,12 +240,12 @@ void select_pivot(int data[], int front, int rear)
 
 	for (i = 0; front + 5*(i+1) -1 <= rear; ++i)
 	{
-		insertion_sort_range(data, front + 5*i + 0, front+ 5*i + 4);
+		insertion_sort(data, front + 5*i + 0, front+ 5*i + 4);
 		exchange(data, front + i, front + 5 *i +2);
 	}
 	if (i < n)
 	{
-		insertion_sort_range(data, front + 5*i, rear);
+		insertion_sort(data, front + 5*i, rear);
 		exchange(data, front + i, (front + 5*i + rear)/2);
 	}
 
@@ -399,13 +384,13 @@ int main() {
 	stooge_sort(array, 0, MAX - 1);
 	end_time = clock();
 	cout << "stooge_sort time : " << end_time - start_time << "ms"<< endl;
-
+	 */
 	for (int i = 0; i< MAX; ++i)
 	{
 		array[i] = org_array[i];
 	}
 	start_time = clock();
-	bubble_sort(array, MAX);
+	bubble_sort(array, 0, MAX -1);
 	end_time = clock();
 	cout << "bubble_sort time : " << end_time - start_time << "ms"<< endl;
 
@@ -414,7 +399,7 @@ int main() {
 		array[i] = org_array[i];
 	}
 	start_time = clock();
-	insertion_sort(array, MAX);
+	insertion_sort(array, 0, MAX -1);
 	end_time = clock();
 	cout << "insert_sort time : " << end_time - start_time << "ms"<< endl;
 
@@ -444,7 +429,12 @@ int main() {
 	quick_sort(array, 0, MAX-1);
 	end_time = clock();
 	cout << "quick_sort time : " << end_time - start_time << "ms"<< endl;
-	*/
+
+	start_time = clock();
+	int result = quick_select(array, 0, MAX-1, 1);
+	end_time = clock();
+	assert(result == array[0]);
+	cout << "quick_select time : " << end_time - start_time << "ms"<< endl;
 
 	for (int i = 0; i< MAX; ++i)
 	{
@@ -454,17 +444,6 @@ int main() {
 	quick_sort_iterative(array, 0, MAX-1);
 	end_time = clock();
 	cout << "quick_sort_iterative time : " << end_time - start_time << "ms"<< endl;
-
-	start_time = clock();
-	int result = quick_select(array, 0, MAX-1, 1);
-	end_time = clock();
-	assert(result == array[0]);
-	cout << "quick_select time : " << end_time - start_time << "ms"<< endl;
-
-	start_time = clock();
-	quick_sort(array, 0, MAX-1);
-	end_time = clock();
-	cout << "quick_sort time : " << end_time - start_time << "ms"<< endl;
 
 	for(int i = 1; i < MAX -1;++i)
 	{
