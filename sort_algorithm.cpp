@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define MAX (1024*8*4)
+#define MAX (1024*8*32)
 int array[MAX+1];
 int org_array[MAX+1];
 int stack[MAX];
@@ -234,26 +234,26 @@ void select_pivot(int data[], int front, int rear)
 		return;
 	}
 
-	int n = (rear - front + 1) / 5;
+	int group_number = (rear - front + 1) / 5;
 	if ((rear - front +1) % 5 != 0)
 	{
-		n++;
+		group_number++;
 	}
-	int i = 0;
 
+	int i = 0;
 	for (i = 0; front + 5*(i+1) -1 <= rear; ++i)
 	{
 		insertion_sort(data, front + 5*i + 0, front+ 5*i + 4);
 		exchange(data, front + i, front + 5 *i +2);
 	}
-	if (i < n)
+	if (i < group_number)
 	{
 		insertion_sort(data, front + 5*i, rear);
 		exchange(data, front + i, (front + 5*i + rear)/2);
 	}
 
-	quick_select(data, front, front + n - 1, n/2);
-	exchange(data, front + n/2, rear);
+	quick_select(data, front, front + group_number - 1, group_number/2);
+	exchange(data, front + group_number/2, rear);
 }
 
 int quick_select_iterative(int data[], int front, int rear, int kth)
@@ -278,7 +278,7 @@ int quick_select_iterative(int data[], int front, int rear, int kth)
 
         pivot_position = partition(data, front, rear);
         int length = pivot_position - front + 1;
-        if ( length == order )
+        if ( order == length )
         {
         	break;
         }
@@ -387,7 +387,7 @@ int main() {
 	stooge_sort(array, 0, MAX - 1);
 	end_time = clock();
 	cout << "stooge_sort time : " << end_time - start_time << "ms"<< endl;
-	 */
+
 	for (int i = 0; i< MAX; ++i)
 	{
 		array[i] = org_array[i];
@@ -405,6 +405,7 @@ int main() {
 	insertion_sort(array, 0, MAX -1);
 	end_time = clock();
 	cout << "insert_sort time : " << end_time - start_time << "ms"<< endl;
+	 */
 
 	for (int i = 0; i< MAX; ++i)
 	{
